@@ -19,7 +19,7 @@ class Bank(ABC):
         return "Generic bank: 0"
 
     @abstractmethod
-    def withdraw(self, amount):
+    def withdraw():
         pass
 
 # Class Swiss
@@ -57,7 +57,7 @@ class Swiss(Bank):
         return "Swiss Bank: " + str(self.bal)
 
     def withdraw(self, amount):
-        if self.bal < amount:
+        if amount > self.bal:
             print("Insufficient funds")
             return self.bal
         else:

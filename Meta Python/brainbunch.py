@@ -1,34 +1,17 @@
-class Animal():
-    def has_fur(self):
-        return True
+import sys
 
-    def eats(self):
-        return True
+locations = sys.path
+print(locations)
 
-class Dog(Animal):
-    def barks(self):
-        return "Woof"
+print("")
+for i in locations:
+    print(i)
 
-class Cat(Animal):
-    def meows(self):
-        return "meow"
+import calendar
 
-class Parrot(Animal):
-    def has_fur(self):
-        return False
+leapdays = calendar.leapdays(2000, 2050)
+print(leapdays)
+isitleap = calendar.isleap(2037)
+print(isitleap)
 
-p = Parrot()
-print("A parrot has fur??? ", p.has_fur())
-
-
-d = Cat()
-print(d.meows())
-print(d.has_fur())
-
-# value = 7
-# class A:
-#     value = 5
-
-# v = A()
-# v.value = 3
-# print(v.value)
+print(calendar.mdays)

@@ -36,4 +36,4 @@ def balance(start_balance, days_of_june):
 
 # expect return of 1583,90
 average_balance = balance(start_balance, days_of_june)
-print(f"Average balance for june: {average_balance}")
+print(f"Average balance for june: {average_balance:.2f}")

@@ -1,9 +1,20 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-# from django.urls import path
-# from . import views
 
 
 # Create your views here.
 def home(request):
-    return HttpResponse("<h1> Welcome to Little Lemon restaurant! </h1")
+    path = request.path
+    scheme = request.scheme
+    method = request.method
+    address = request.META['REMOTE_ADDR']
+
+    msg = f"""<br>
+        <br>Path: {path}
+        <br>Address: {address}
+        <br>Scheme: {scheme}
+        <br>Method: {method}
+        response = HttpResponse("This work")
+        return response
+    """
+    return HttpResponse(msg, content_type='text/html', charset='utf-8')

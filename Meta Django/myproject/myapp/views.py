@@ -3,17 +3,30 @@ from django.http import HttpResponse, HttpResponseNotFound
 
 
 # Create your views here.
-def home(request):
-    return HttpResponseNotFound("Welcome to Little Lemon!")
 
-def about(request):
-    return HttpResponse("About us")
+# CREATING FORMS ***************
+from myapp.forms import InputForm
 
-def menu(request):
-    return HttpResponse("Menu")
+def form_view(request):
+    form = InputForm()
+    context = {"form": form}
+    return render(request, "home.html", context)
 
-def book(request):
-    return HttpResponse('Make a booking')
+
+
+# ROUTING*******************
+
+# def home(request):
+#     return HttpResponseNotFound("Welcome to Little Lemon!")
+
+# def about(request):
+#     return HttpResponse("About us")
+
+# def menu(request):
+#     return HttpResponse("Menu")
+
+# def book(request):
+#     return HttpResponse('Make a booking')
 
 
 
@@ -32,6 +45,8 @@ def book(request):
 #         return response
 #     """
 #     return HttpResponse(msg, content_type='text/html', charset='utf-8')
+
+#MODELS CRUD**************
 
 # def menuitems(request, dish):
 #     items = {

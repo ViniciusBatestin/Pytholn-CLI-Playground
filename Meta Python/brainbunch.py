@@ -48,3 +48,22 @@
 
 # february = snow_calc(4)
 # print(february)
+
+#REFACTOR ....
+
+# def longest(a1, a2):
+#     lst = a1 + a2
+#     a = list(set(lst))
+#     s = sorted(a)
+#     j = ",".join(s)
+#     r = j.replace(",", "")
+#     return r
+
+def longest(a1,a2):
+    return "".join(sorted(set(a1+a2)))
+
+a = "xyaabbbccccdefww"
+b = "xxxxyyyyabklmopq"
+
+l = longest(a, b)
+print(l)

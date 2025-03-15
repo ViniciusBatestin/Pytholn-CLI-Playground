@@ -1,16 +1,20 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound
-
+from myapp.forms import BookingForm
 
 # Create your views here.
 
 # CREATING FORMS ***************
-from myapp.forms import InputForm
+# from myapp.forms import InputForm
 
 def form_view(request):
-    form = InputForm()
+    form = BookingForm()
+    if request.method == 'POST':
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            form.save()
     context = {"form": form}
-    return render(request, "home.html", context)
+    return render(request, "booking.html", context)
 
 
 

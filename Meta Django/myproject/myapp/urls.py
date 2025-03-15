@@ -6,7 +6,7 @@ urlpatterns = [
     # path('aboutus/', views.about, name='abaout'),
     # path('menu/', views.menu, name="menu"),
     # path('book/', views.book, name="book")
-    path('home/', views.form_view,)
+    path('booking/', views.form_view,)
 ]
 
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import MenuItem, Category
 from decimal import Decimal
+import bleach
 
 # SERIALIZER CLASS
 # class MenuItemSerializer(serializers.Serializer):
@@ -19,9 +20,21 @@ class MenuItemSerializer(serializers.ModelSerializer):
     price_after_tax = serializers.SerializerMethodField(method_name = 'calculate_tax') # How to add new field only user display
     category = CategorySerializer(read_only=True)
     category_id = serializers.IntegerField(write_only=True)
+    #Method 3 of validation - validate_field()
+    def validate_stock(self, value):
+        if value < 0:
+            raise serializers.ValidationError('Stock cannot be negative')
+        return value
+    def validate_title(self, value):
+        return bleach.clean(value)
     class Meta:
         model = MenuItem
         fields = ['id', 'title', 'price', 'stock', 'price_after_tax', 'category', 'category_id']
+        #validations methods 2
+        extra_kwargs = {
+            'price': {'min_value':1},
+            # 'stock': {'source':'inventory', 'min_value':0} - Didn't work method 2 when using source
+        }
 
     def calculate_tax(self, product:MenuItem):
         return product.price * Decimal(1.1)

@@ -1,3 +1,15 @@
-*SUPER USER*
+*SUPER USER - admin*
+username: admin
+Password: lemon@123!
+
+*MANAGER*
 username: Miso
 Password: lemon@123!
+
+*DELIVERY*
+username: Mapeka
+Password: lemon@123!
+
+*CUSTOMER*
+username: Customer
+password: lemon@123!

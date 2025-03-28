@@ -13,3 +13,7 @@ Password: lemon@123!
 *CUSTOMER*
 username: Customer
 password: lemon@123!
+
+*FOR MANAGER ASSIGNEMENT*
+username: Koringa
+password: lemon@123!

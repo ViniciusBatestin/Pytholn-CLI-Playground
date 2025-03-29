@@ -130,7 +130,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.permissions.IsAuthenticated', TODO uncomment if needed for permissions
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',# TODO Comment this line before delivery
+        # 'rest_framework.authentication.SessionAuthentication',# TODO Comment this line before delivery
     ),
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',

@@ -4,13 +4,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from .models import Category, MenuItem, Cart, Order, OrderItem
-from .serializers import MenuItemSerializer, UserSerializer, CartSerializer
+from .serializers import MenuItemSerializer, UserSerializer, CartSerializer, OrderSerializer, OrderItemSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User, Group
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from .permissions import ManagerPermissions, DeliveryCrewPermissions
-
+from decimal import Decimal
+from datetime import date
 # Create your views here.
 
 # Create functions to match endpoint in the description
@@ -36,7 +37,6 @@ def login(request):
 
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
 def menu_items(request):
     if request.method == 'GET':
         items = MenuItem.objects.all()
@@ -47,6 +47,7 @@ def menu_items(request):
         return Response({'message':'You are not authorized'},
                         status=status.HTTP_403_FORBIDDEN)
 
+    permission_classes([IsAuthenticated])
     if request.method == 'POST':
         serialized_item = MenuItemSerializer(data=request.data)
         if serialized_item.is_valid():
@@ -161,59 +162,82 @@ def remove_delivery_crew(request, pk):
 
 
 class CartViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def create(self, request, *args, **kwargs):
-        menuitem_title= request.data.get('title')
-        quantity = int(request.data.get('quantity', 1))
-        if not menuitem_title:
-            print(f"Debug: Received payload - {request.data}")
-            return Response({'message':'Menu item title is required'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        try:
-            menuitem= MenuItem.objects.get(title=menuitem_title)
-        except MenuItem.DoesNotExist:
-            return Response({'message': 'Menu item not found'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        unit_price = menuitem.price
-        price = unit_price * quantity
-
-        cart_item, create = Cart.objects.get_or_create(
-            user = request.user,
-            menuitem=menuitem,
-            defaults={'quantity':quantity,
-                      'unit_price':unit_price,
-                      'price': price,
-            }
-        )
-
-        if not create:
-            cart_item.quantity += quantity
-            cart_item.price = cart_item.quantity * cart_item.unit_price
-            cart_item.save()
-
-        return Response({'message':f'{menuitem} was added to cart'},
-                        status=status.HTTP_201_CREATED)
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
+        """GET /api/cart/menu-items - List cart items"""
         carts = Cart.objects.filter(user=request.user)
         serialized_items = CartSerializer(carts, many=True)
         return Response(serialized_items.data)
 
-    def destroy(self, request, pk=None):
-        menuitem_title = request.data.get('title')
+    def create(self, request, *args, **kwargs):
+        """POST /api/cart/menu-items - Add item to cart"""
+        menuitem_id = request.data.get('menuitem_id')
+        quantity = int(request.data.get('quantity', 1))
 
-        if pk:
-            try:
-                cart_item = Cart.objects.get(pk=pk, user=request.user)
-                cart_item.delete()
-                return Response({'message':'Item removed form cart'},
-                                status=status.HTTP_200_OK)
-            except Cart.DoesNotExist:
-                return Response({'message': 'Item not found in cart'},
-                                status=status.HTTP_400_BAD_REQUEST)
+        if not menuitem_id:
+            return Response(
+                {'message': 'menuitem_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            menuitem = MenuItem.objects.get(pk=menuitem_id)
+        except MenuItem.DoesNotExist:
+            return Response(
+                {'message': 'Menu item not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Calculate prices
+        unit_price = menuitem.price
+        price = unit_price * quantity
+
+        # Create or update cart item
+        cart_item, created = Cart.objects.get_or_create(
+            user=request.user,
+            menuitem=menuitem,
+            defaults={
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'price': price
+            }
+        )
+
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.price = cart_item.quantity * cart_item.unit_price
+            cart_item.save()
+
+        return Response(
+            {'message': f'{menuitem.title} added to cart'},
+            status=status.HTTP_201_CREATED
+        )
+
+    def destroy(self, request):
+        """DELETE /api/cart/menu-items - Clear entire cart"""
+        deleted_count, _ = Cart.objects.filter(user=request.user).delete()
+        return Response(
+            {'message': f'Cart cleared ({deleted_count} items removed)'},
+            status=status.HTTP_200_OK
+        )
+
+# Orders
+
+class OrdersViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+
+        if ManagerPermissions().has_permission(request, self):
+            queryset = Order.objects.all()
+            print('manager returned')
         else:
-            deleted_count, _ = Cart.objects.filter(user=request.user).delete()
-            return Response({'message': f'Cleared {deleted_count} items from cart'},
-                            status=status.HTTP_200_OK)
+            queryset = Order.objects.filter(user=request.user)
+            print('else returned')
+
+        serializer_class = OrderItemSerializer(queryset, many = True)
+        return Response(serializer_class.data)
+
+    def create(self, request):
+        pass

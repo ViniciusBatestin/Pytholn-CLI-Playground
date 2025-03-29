@@ -23,8 +23,17 @@ urlpatterns = [
     path('cart/menu-items/', views.CartViewSet.as_view({
         'delete': 'destroy',
         'get': 'list',
-        'post': 'create'
+        'post': 'create',
     })),
+
+    path('orders/', views.OrdersViewSet.as_view({
+        'get': 'list',
+        'post': 'create',
+        'put': 'retrieve',
+        'patch': 'update',
+        'delete': 'destroy',
+
+        })),
 
     path('userlist', views.UserList.as_view())
 ]

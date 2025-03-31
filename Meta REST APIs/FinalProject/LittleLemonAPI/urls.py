@@ -29,9 +29,9 @@ urlpatterns = [
     path('orders/', views.OrdersViewSet.as_view({
         'get': 'list',
         'post': 'create',
-        'put': 'retrieve',
-        'patch': 'update',
-        'delete': 'destroy',
+        # 'put': 'retrieve',
+        # 'patch': 'update',
+        # 'delete': 'destroy',
 
         })),
 

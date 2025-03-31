@@ -232,12 +232,66 @@ class OrdersViewSet(viewsets.ViewSet):
         if ManagerPermissions().has_permission(request, self):
             queryset = Order.objects.all()
             print('manager returned')
+        elif DeliveryCrewPermissions().has_permission(request, self):
+            queryset = Order.objects.filter(delivery_crew = request.user)
+            print('Delivere crew rturned')
         else:
             queryset = Order.objects.filter(user=request.user)
             print('else returned')
 
-        serializer_class = OrderItemSerializer(queryset, many = True)
+        serializer_class = OrderSerializer(queryset, many = True)
         return Response(serializer_class.data)
 
     def create(self, request):
+        cart_items = Cart.objects.filter(user=request.user)
+        delivery_group = Group.objects.get(name = 'Delivery crew')
+        delivery_worker = User.objects.filter(groups=delivery_group).first()
+
+        order_total = sum(Decimal(str(item.price)) for item in cart_items)
+        order = Order.objects.create(
+            user = request.user,
+            delivery_crew = delivery_worker,
+            status = False,
+            total = order_total,
+            date = date.today()
+        )
+        order.save()
+        # print(f"Order ID: {order.id}, User: {order.user.username}, Delivery Crew: {order.delivery_crew.username if order.delivery_crew else 'None'}, Status: {order.status}, Total: {order.total}, Date: {order.date}")
+
+        new_order_items = []
+        for item in cart_items:
+            new_order = OrderItem.objects.create(
+                order = order,
+                menuitem = item.menuitem,
+                quantity = item.quantity,
+                unit_price = item.unit_price,
+                price = item.price,
+            )
+            new_order_items.append(new_order)
+        cart_items.delete()
+        print(new_order_items)
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None):
+        order = get_object_or_404(pk=pk)
+        if ManagerPermissions.has_permission(self.request):
+            serializer = OrderItemSerializer(order, data=request.data, partial =True)
+            serializer.is_valid()
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return({'message':'You are not authorized'})
+
+    def partial_update(self, request, pk=None):
         pass
+    # TODO the customer can read orderid and update it partially or entirely.
+    # the manager can set a delivery crew to this order and its status to 0 or 1
+
+
+    def destroy(self, request, pk=None):
+        if not ManagerPermissions.has_permission(self, request):
+            return Response('You have no permission')
+
+        order = get_object_or_404(Order, pk=pk)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

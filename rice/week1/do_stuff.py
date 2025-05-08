@@ -27,3 +27,23 @@ def future_value(present_value, annual_rate, periods_per_year, years):
 
 print ("$1000 at 2% compounded daily for 3 years yields $", future_value(1000, .02, 365, 3))
 print(future_value(500, .04, 10, 10))'''
+
+#####V lotery
+# import random
+# s = []
+# for _ in range(6):
+#     r = random.randint(1, 50)
+#     s.append(r)
+
+# print(s)
+
+# Pyrmaid
+# a = "*"
+# for i in range(5):
+#     if i > 0:
+#         result = a * i
+#         print(result)
+
+# print(8)
+# print(13, end=" ") #end=" " is used to not skip to a new line
+# print(21)
